@@ -1,0 +1,23 @@
+name: Change Ticket Reference Check
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, edited]
+
+jobs:
+  check-change-ticket:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check for Change Ticket Reference
+        env:
+          PR_TITLE: ${{ github.event.pull_request.title }}
+          PR_BODY: ${{ github.event.pull_request.body }}
+        run: |
+          if echo "$PR_TITLE $PR_BODY" | grep -Eiq '(CHG[0-9]{7}|RITM[0-9]{7}|REQ[0-9]{7})'; then
+            echo "Valid change ticket reference found."
+            exit 0
+          else
+            echo "Error: No valid change ticket reference found in PR title or description."
+            echo "Please include a change ticket reference in the format CHG1234567, RITM1234567, or REQ1234567."
+            exit 1
+          fi
